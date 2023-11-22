@@ -15,7 +15,12 @@ const createController = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
+    res.status(200).json({
+      success: false,
+      message: "Something went wrong",
+      error: error,
+    });
   }
 };
 
