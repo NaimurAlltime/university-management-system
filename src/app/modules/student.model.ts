@@ -12,13 +12,13 @@ const userNameSchema = new Schema<UserName>({
     trim: true,
     required: [true, "First name is required"],
     maxlength: [20, "First Name can not be more than 20 characters"],
-    validate: {
-      validator: function (value: string) {
-        const firstName = value.charAt(0).toLocaleUpperCase() + value.slice(1);
-        return firstName === value;
-      },
-      message: "{VALUE} is not in a capitalize format",
-    },
+    // validate: {
+    //   validator: function (value: string) {
+    //     const firstName = value.charAt(0).toLocaleUpperCase() + value.slice(1);
+    //     return firstName === value;
+    //   },
+    //   message: "{VALUE} is not in a capitalize format",
+    // },
   },
   middleName: {
     type: String,
@@ -28,6 +28,10 @@ const userNameSchema = new Schema<UserName>({
     trim: true,
     required: [true, "Last name is required"],
     maxlength: [20, "Last Name can not be more than 20 characters"],
+    // validate: {
+    //   validator: (value: string) => validator.isAlpha(value),
+    //   message: "{VALUE} is a not valid",
+    // },
   },
 });
 
@@ -96,6 +100,10 @@ const studentSchema = new Schema<Student>({
     type: String,
     required: [true, "Email is required"],
     unique: true,
+    // validate: {
+    //   validator: (value: string) => validator.isEmail(value),
+    //   message: "{VALUE} is a not valid email",
+    // },
   },
   contactNo: { type: String, required: true },
   emergencyContactNo: { type: String, required: true },
