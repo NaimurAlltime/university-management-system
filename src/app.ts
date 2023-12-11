@@ -1,5 +1,6 @@
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
+import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import { StudentRoutes } from "./app/modules/student/student.route";
 import { UserRoutes } from "./app/modules/user/user.route";
 const app: Application = express();
@@ -16,5 +17,8 @@ app.get("/", (req: Request, res: Response) => {
   // const a = 10;
   res.send("server in running");
 });
+
+// global error handler middleware
+app.use(globalErrorHandler);
 
 export default app;

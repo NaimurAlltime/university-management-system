@@ -1,7 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserService } from "./user.service";
 
-const createController = async (req: Request, res: Response) => {
+const createController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     //data validation using zod
 
@@ -15,14 +19,8 @@ const createController = async (req: Request, res: Response) => {
       message: "Student is created successfully",
       data: result,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    // console.log(error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Something went wrong",
-      error: error,
-    });
+  } catch (error) {
+    next(error);
   }
 };
 
