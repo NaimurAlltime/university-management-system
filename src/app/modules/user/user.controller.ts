@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import httpStatus from "http-status";
+import sendResponse from "../../utils/sendResponse";
 import { UserService } from "./user.service";
 
 const createController = async (
@@ -14,7 +16,8 @@ const createController = async (
     const result = await UserService.createStudentIntuDB(password, StudentData);
 
     //send response
-    res.status(200).json({
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
       success: true,
       message: "Student is created successfully",
       data: result,
