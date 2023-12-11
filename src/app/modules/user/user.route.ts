@@ -4,6 +4,6 @@ import { UserControllers } from "./user.controller";
 const router = express.Router();
 
 // call will controller function
-router.post("/create-student", UserControllers.createController);
+router.post("/create-student", UserControllers.createStudent);
 
 export const UserRoutes = router;
