@@ -1,5 +1,7 @@
+import httpStatus from "http-status";
 import mongoose from "mongoose";
 import config from "../../config";
+import AppError from "../../errors/AppError";
 import { AcademicSemester } from "../academicSemester/academicSemester.model";
 import { TStudent } from "../student/student.interface";
 import { Student } from "../student/student.model";
@@ -22,9 +24,9 @@ const createStudentIntuDB = async (password: string, payload: TStudent) => {
     payload.admissionSemester
   );
 
-  // if (!admissionSemester) {
-  //   throw new AppError(400, "Admission semester not found");
-  // }
+  if (!admissionSemester) {
+    throw new AppError(400, "Admission semester not found");
+  }
 
   const session = await mongoose.startSession();
 
@@ -37,9 +39,9 @@ const createStudentIntuDB = async (password: string, payload: TStudent) => {
     const newUser = await User.create([userData], { session }); // array
 
     //create a student
-    // if (!newUser.length) {
-    //   throw new AppError(httpStatus.BAD_REQUEST, "Failed to create user");
-    // }
+    if (!newUser.length) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Failed to create user");
+    }
     // set id , _id as user
     payload.id = newUser[0].id;
     payload.user = newUser[0]._id; //reference _id
@@ -48,9 +50,9 @@ const createStudentIntuDB = async (password: string, payload: TStudent) => {
 
     const newStudent = await Student.create([payload], { session });
 
-    // if (!newStudent.length) {
-    //   throw new AppError(httpStatus.BAD_REQUEST, "Failed to create student");
-    // }
+    if (!newStudent.length) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Failed to create student");
+    }
 
     await session.commitTransaction();
     await session.endSession();

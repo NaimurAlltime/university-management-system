@@ -1,5 +1,4 @@
 import { model, Schema } from "mongoose";
-
 import {
   StudentModel,
   TGuardian,
@@ -77,10 +76,14 @@ const localGuradianSchema = new Schema<TLocalGuardian>({
 
 const studentSchema = new Schema<TStudent, StudentModel>(
   {
-    id: { type: String, required: [true, "ID is required"], unique: true },
+    id: {
+      type: String,
+      required: [true, "ID is required"],
+      unique: true,
+    },
     user: {
       type: Schema.Types.ObjectId,
-      required: [true, "user id is required"],
+      required: [true, "User id is required"],
       unique: true,
       ref: "User",
     },
@@ -135,13 +138,9 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       type: Schema.Types.ObjectId,
       ref: "AcademicSemester",
     },
-    isActive: {
-      type: String,
-      enum: {
-        values: ["active", "blocked"],
-        message: "{VALUE} is not a valid status",
-      },
-      default: "active",
+    academicDepartment: {
+      type: Schema.Types.ObjectId,
+      ref: "AcademicDepartment",
     },
     isDeleted: {
       type: Boolean,
@@ -155,9 +154,9 @@ const studentSchema = new Schema<TStudent, StudentModel>(
   }
 );
 
-// virtual
+//virtual
 studentSchema.virtual("fullName").get(function () {
-  return this.name.firstName + this.name.middleName + this.name.lastName;
+  return this?.name?.firstName + this?.name?.middleName + this?.name?.lastName;
 });
 
 // Query Middleware
