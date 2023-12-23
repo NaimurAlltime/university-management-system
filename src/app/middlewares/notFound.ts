@@ -1,17 +1,16 @@
-import { NextFunction, Request, Response } from "express";
-import httpStatus from "http-status";
-
+import { Request, Response, NextFunction } from 'express';
+import httpStatus from 'http-status';
 const notFound = (
   req: Request,
   res: Response,
-  //  eslint-disable-next-line @typescript-eslint/no-unused-vars
-  next: NextFunction
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+  next: NextFunction,
 ) => {
-  const message = "Api Not Found!!";
-  res.status(httpStatus.NOT_FOUND).json({
+  return res.status(httpStatus.NOT_FOUND).json({
     success: false,
-    message: message,
-    error: "",
+    status: httpStatus.NOT_FOUND,
+    message: 'Not Found!',
+    error: 'Not Found!',
   });
 };
 

@@ -1,30 +1,39 @@
-import bcrypt from "bcrypt";
-import { model, Schema } from "mongoose";
-import config from "../../config";
-import { TUser } from "./user.interface";
+import { Schema, model } from 'mongoose';
+import { TUser, UserModel } from './user.interface';
+import config from '../../config';
+import bcrypt from 'bcrypt';
+import { UserStatus } from './user.constant';
 
-const UserScheme = new Schema<TUser>(
+const userSchema = new Schema<TUser, UserModel>(
   {
     id: {
       type: String,
-      require: true,
+      required: [true, 'Id is required!'],
+      unique: true,
+    },
+    email: {
+      type: String,
+      required: [true, 'Email is required!'],
+      unique: true,
     },
     password: {
       type: String,
-      require: true,
+      required: [true, 'Password is required!'],
+      select: 0,
     },
     needsPasswordChange: {
       type: Boolean,
       default: true,
     },
+    passwordChangedAt: Date,
     role: {
       type: String,
-      enum: ["student", "faculty", "admin"],
+      enum: ['student', 'faculty', 'admin'],
     },
     status: {
       type: String,
-      enum: ["in-progress", "blocked"],
-      default: "in-progress",
+      enum: UserStatus,
+      default: 'in-progress',
     },
     isDeleted: {
       type: Boolean,
@@ -33,26 +42,43 @@ const UserScheme = new Schema<TUser>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-// password hash before post
-UserScheme.pre("save", async function (next) {
-  // console.log(this, 'pre hook : we will save  data');
+//! pre save middleware/hook || hashing password
+userSchema.pre('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this; // doc
-  // hashing password and save into DB
+  const user = this;
   user.password = await bcrypt.hash(
     user.password,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_round),
   );
   next();
 });
 
-// save empty string after post
-UserScheme.post("save", function (doc, next) {
-  doc.password = "";
+//! post save middleware/hook
+userSchema.post('save', function (doc, next) {
+  doc.password = '';
   next();
 });
 
-export const User = model<TUser>("user", UserScheme);
+userSchema.statics.isUserExistsByCustomId = async function (id: string) {
+  return await this.findOne({ id }).select('+password');
+};
+
+userSchema.statics.isJwtIssuedBeforePasswordChanged = function (
+  passwordChangedAt: Date,
+  jwtIssuedAt: number,
+) {
+  const passwordChangedAtTime = passwordChangedAt.getTime() / 1000;
+  return passwordChangedAtTime > jwtIssuedAt;
+};
+
+userSchema.statics.isPasswordMatched = async function (
+  plainPassword: string,
+  hashedPassword: string,
+) {
+  return await bcrypt.compare(plainPassword, hashedPassword);
+};
+
+export const User = model<TUser, UserModel>('User', userSchema);

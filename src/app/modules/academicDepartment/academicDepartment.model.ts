@@ -1,7 +1,6 @@
-import httpStatus from "http-status";
-import { model, Schema } from "mongoose";
-import AppError from "../../errors/AppError";
-import { TAcademicDepartment } from "./academicDepartment.interface";
+import { Schema, model } from 'mongoose';
+import { TAcademicDepartment } from './academicDepartment.interface';
+import AppError from '../../errors/AppError';
 
 const academicDepartmentSchema = new Schema<TAcademicDepartment>(
   {
@@ -12,44 +11,37 @@ const academicDepartmentSchema = new Schema<TAcademicDepartment>(
     },
     academicFaculty: {
       type: Schema.Types.ObjectId,
-      ref: "AcademicFaculty",
+      ref: 'AcademicFaculty',
+      required: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-academicDepartmentSchema.pre("save", async function (next) {
-  const isDepartmentExist = await AcademicDepartment.findOne({
+// Pre Hooks
+academicDepartmentSchema.pre('save', async function (next) {
+  const isDepartmentExists = await AcademicDepartment.findOne({
     name: this.name,
   });
-
-  if (isDepartmentExist) {
-    throw new AppError(
-      httpStatus.NOT_FOUND,
-      "This department is already exist!"
-    );
+  if (isDepartmentExists) {
+    throw new AppError(404, 'This department is Already Exists!');
   }
-
   next();
 });
 
-academicDepartmentSchema.pre("findOneAndUpdate", async function (next) {
-  const query = this.getQuery();
-  const isDepartmentExist = await AcademicDepartment.findOne(query);
+academicDepartmentSchema.pre('findOneAndUpdate', async function (next) {
+  const id = this.getQuery();
+  const isDepartmentExists = await AcademicDepartment.findOne(id);
 
-  if (!isDepartmentExist) {
-    throw new AppError(
-      httpStatus.NOT_FOUND,
-      "This department does not exist! "
-    );
+  if (!isDepartmentExists) {
+    throw new AppError(404, 'This department does not Exists!');
   }
-
   next();
 });
 
 export const AcademicDepartment = model<TAcademicDepartment>(
-  "AcademicDepartment",
-  academicDepartmentSchema
+  'AcademicDepartment',
+  academicDepartmentSchema,
 );

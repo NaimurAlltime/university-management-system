@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
@@ -7,21 +8,21 @@ const app: Application = express();
 
 // parser
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: ["http://localhost:5173"] }));
+app.use(cookieParser());
 
 // application routes
 app.use("/api/v1", router);
 
-//testing
+// test api
 app.get("/", (req: Request, res: Response) => {
-  // const a = 10;
-  res.send("server in running");
+  res.send("server is up and running!");
 });
 
-// global error handler middleware
+// global error handler
 app.use(globalErrorHandler);
 
-// Not found middleware
+// not found
 app.use(notFound);
 
 export default app;

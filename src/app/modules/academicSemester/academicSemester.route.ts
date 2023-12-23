@@ -1,28 +1,41 @@
-import express from "express";
-import validateRequest from "../../middlewares/validateRequest";
-import { AcademicSemesterControllers } from "./academicSemester.controller";
-import { AcademicSemesterValidations } from "./academicSemester.validation";
+import express from 'express';
+import { AcademicSemesterControllers } from './academicSemester.controller';
+import validateRequest from '../../middlewares/validateRequest';
+import { AcademicSemesterValidations } from './academicSemester.validation';
+import auth from '../../middlewares/auth';
+import { USER_ROLES } from '../user/user.constant';
 
-const router = express.Router();
+const route = express.Router();
 
-router.post(
-  "/create-academic-semester",
+route.get(
+  '/',
+  auth(USER_ROLES.admin),
+  AcademicSemesterControllers.getAllAcademicSemesters,
+);
+route.post(
+  '/create-academic-semester',
+  auth(USER_ROLES.admin),
   validateRequest(
-    AcademicSemesterValidations.createAcademicSemesterValidationSchema
+    AcademicSemesterValidations.createAcademicSemesterValidationSchema,
   ),
-  AcademicSemesterControllers.createAcademicSemester
+  AcademicSemesterControllers.createAcademicSemester,
+);
+route.get(
+  '/:id',
+  auth(USER_ROLES.admin),
+  AcademicSemesterControllers.getSingleAcademicSemester,
+);
+route.patch(
+  '/:id',
+  validateRequest(
+    AcademicSemesterValidations.updateAcademicSemesterValidationSchema,
+  ),
+  AcademicSemesterControllers.updateAcademicSemester,
+);
+route.delete(
+  '/:id',
+  auth(USER_ROLES.admin),
+  AcademicSemesterControllers.deleteAcademicSemester,
 );
 
-router.get("/:courseId", AcademicSemesterControllers.getSingleAcademicSemester);
-
-router.patch(
-  "/:courseId",
-  validateRequest(
-    AcademicSemesterValidations.updateAcademicSemesterValidationSchema
-  ),
-  AcademicSemesterControllers.updateAcademicSemester
-);
-
-router.get("/", AcademicSemesterControllers.getAllAcademicSemesters);
-
-export const AcademicSemesterRoutes = router;
+export const AcademicSemesterRoutes = route;

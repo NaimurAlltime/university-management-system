@@ -1,10 +1,4 @@
-import { Model, Types } from "mongoose";
-
-export type TUserName = {
-  firstName: string;
-  middleName: string;
-  lastName: string;
-};
+import { Model, Types } from 'mongoose';
 
 export type TGuardian = {
   fatherName: string;
@@ -13,6 +7,12 @@ export type TGuardian = {
   motherName: string;
   motherOccupation: string;
   motherContactNo: string;
+};
+
+export type TUsername = {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
 };
 
 export type TLocalGuardian = {
@@ -26,36 +26,34 @@ export type TStudent = {
   id: string;
   user: Types.ObjectId;
   password: string;
-  name: TUserName;
-  gender: "male" | "female" | "other";
+  name: TUsername;
+  gender: 'male' | 'female' | 'other';
   dateOfBirth?: Date;
   email: string;
   contactNo: string;
   emergencyContactNo: string;
-  bloodGroup?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+  bloodGroup?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
   presentAddress: string;
   permanentAddress: string;
   guardian: TGuardian;
   localGuardian: TLocalGuardian;
-  profileImg?: string;
   admissionSemester: Types.ObjectId;
   academicDepartment: Types.ObjectId;
-  isActive: "active" | "blocked";
-  isDeleted?: boolean;
+  profileImg?: string;
+  isDeleted: boolean;
 };
 
-// for creating static
-
+//! creating a static method
 export interface StudentModel extends Model<TStudent> {
-  isUserExists(id: string): Promise<TStudent | null>;
+  // eslint-disable-next-line no-unused-vars
+  IsStudentExists(id: string): Promise<TStudent | null>;
 }
 
-// for creating instance
-
+// ! creating an instance
 // export interface StudentMethods {
-//   isUserExists(id: string): Promise<TStudent | null>;
+//   // eslint-disable-next-line no-unused-vars
+//   IsStudentExists(id: string): Promise<TStudent | null>;
 // }
-
 // export type StudentModel = Model<
 //   TStudent,
 //   Record<string, never>,

@@ -1,28 +1,39 @@
-import express from "express";
-import validateRequest from "../../middlewares/validateRequest";
-import { AcademicFacultyControllers } from "./academicFaculty.controller";
-import { AcademicFacultyValidation } from "./academicFaculty.validation";
+import express from 'express';
+import validateRequest from '../../middlewares/validateRequest';
+import { AcademicFacultyControllers } from './academicFaculty.controller';
+import { AcademicFacultyValidations } from './academicFaculty.validation';
+import auth from '../../middlewares/auth';
+import { USER_ROLES } from '../user/user.constant';
 
 const router = express.Router();
 
 router.post(
-  "/create-academic-faculty",
-  validateRequest(
-    AcademicFacultyValidation.createAcademicFacultyValidationSchema
-  ),
-  AcademicFacultyControllers.createAcademicFaculty
+  '/',
+  auth(USER_ROLES.admin),
+  validateRequest(AcademicFacultyValidations.academicFacultyValidationSchema),
+  AcademicFacultyControllers.createAcademicFaculty,
 );
 
-router.get("/:id", AcademicFacultyControllers.getSingleAcademicFaculty);
-
+router.get(
+  '/',
+  auth(USER_ROLES.admin, USER_ROLES.faculty),
+  AcademicFacultyControllers.getAllAcademicFaculties,
+);
+router.get(
+  '/:id',
+  auth(USER_ROLES.admin, USER_ROLES.faculty),
+  AcademicFacultyControllers.getSingleAcademicFaculty,
+);
 router.patch(
-  "/:id",
-  validateRequest(
-    AcademicFacultyValidation.updateAcademicFacultyValidationSchema
-  ),
-  AcademicFacultyControllers.updateAcademicFaculty
+  '/:id',
+  auth(USER_ROLES.admin),
+  validateRequest(AcademicFacultyValidations.academicFacultyValidationSchema),
+  AcademicFacultyControllers.updateAcademicFaculty,
 );
-
-router.get("/", AcademicFacultyControllers.getAllAcademicFaculties);
+router.delete(
+  '/:id',
+  auth(USER_ROLES.admin),
+  AcademicFacultyControllers.deleteAcademicFaculty,
+);
 
 export const AcademicFacultyRoutes = router;

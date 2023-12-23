@@ -1,27 +1,41 @@
-import { z } from "zod";
+import zod from 'zod';
 import {
-  AcademicSemesterCode,
-  AcademicSemesterName,
+  AcademicSemesterCodes,
+  AcademicSemesterNames,
   Months,
-} from "./academicSemester.constant";
+} from './academicSemester.constant';
 
-const createAcademicSemesterValidationSchema = z.object({
-  body: z.object({
-    name: z.enum([...AcademicSemesterName] as [string, ...string[]]),
-    year: z.string(),
-    code: z.enum([...AcademicSemesterCode] as [string, ...string[]]),
-    startMonth: z.enum([...Months] as [string, ...string[]]),
-    endMonth: z.enum([...Months] as [string, ...string[]]),
+const createAcademicSemesterValidationSchema = zod.object({
+  body: zod.object({
+    name: zod.enum([...AcademicSemesterNames] as [string, ...string[]], {
+      required_error: 'Academic semester name is required',
+    }),
+    year: zod.string({
+      required_error: 'Academic semester year is required',
+    }),
+    code: zod.enum([...AcademicSemesterCodes] as [string, ...string[]], {
+      required_error: 'Academic semester code is required',
+    }),
+    startMonth: zod.enum([...Months] as [string, ...string[]], {
+      required_error: 'Academic semester start month is required',
+    }),
+    endMonth: zod.enum([...Months] as [string, ...string[]], {
+      required_error: 'Academic semester end month is required',
+    }),
   }),
 });
 
-const updateAcademicSemesterValidationSchema = z.object({
-  body: z.object({
-    name: z.enum([...AcademicSemesterName] as [string, ...string[]]).optional(),
-    year: z.string().optional(),
-    code: z.enum([...AcademicSemesterCode] as [string, ...string[]]).optional(),
-    startMonth: z.enum([...Months] as [string, ...string[]]).optional(),
-    endMonth: z.enum([...Months] as [string, ...string[]]).optional(),
+const updateAcademicSemesterValidationSchema = zod.object({
+  body: zod.object({
+    name: zod
+      .enum([...AcademicSemesterNames] as [string, ...string[]])
+      .optional(),
+    year: zod.string().optional(),
+    code: zod
+      .enum([...AcademicSemesterCodes] as [string, ...string[]])
+      .optional(),
+    startMonth: zod.enum([...Months] as [string, ...string[]]).optional(),
+    endMonth: zod.enum([...Months] as [string, ...string[]]).optional(),
   }),
 });
 

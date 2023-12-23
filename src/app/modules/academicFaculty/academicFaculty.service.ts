@@ -1,5 +1,5 @@
-import { TAcademicFaculty } from "./academicFaculty.interface";
-import { AcademicFaculty } from "./academicFaculty.model";
+import { TAcademicFaculty } from './academicFaculty.interface';
+import { AcademicFaculty } from './academicFaculty.model';
 
 const createAcademicFacultyIntoDB = async (payload: TAcademicFaculty) => {
   const result = await AcademicFaculty.create(payload);
@@ -18,11 +18,16 @@ const getSingleAcademicFacultyFromDB = async (id: string) => {
 
 const updateAcademicFacultyIntoDB = async (
   id: string,
-  payload: Partial<TAcademicFaculty>
+  payload: Partial<TAcademicFaculty>,
 ) => {
-  const result = await AcademicFaculty.findOneAndUpdate({ _id: id }, payload, {
+  const result = await AcademicFaculty.findByIdAndUpdate(id, payload, {
     new: true,
   });
+  return result;
+};
+
+const deleteAcademicFacultyFromDB = async (id: string) => {
+  const result = await AcademicFaculty.findByIdAndDelete(id);
   return result;
 };
 
@@ -31,4 +36,5 @@ export const AcademicFacultyServices = {
   getAllAcademicFacultiesFromDB,
   getSingleAcademicFacultyFromDB,
   updateAcademicFacultyIntoDB,
+  deleteAcademicFacultyFromDB,
 };
