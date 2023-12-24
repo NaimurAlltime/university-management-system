@@ -1,67 +1,67 @@
-import { Router } from 'express';
-import { StudentRoutes } from '../modules/student/student.route';
-import { UserRoutes } from '../modules/user/user.route';
-import { AcademicSemesterRoutes } from '../modules/academicSemester/academicSemester.route';
-import { AcademicFacultyRoutes } from '../modules/academicFaculty/academicFaculty.route';
-import { AcademicDepartmentRoutes } from '../modules/academicDepartment/academicDepartment.route';
-import { FacultyRoutes } from '../modules/Faculty/faculty.route';
-import { AdminRoutes } from '../modules/Admin/admin.route';
-import { CourseRoutes } from '../modules/course/course.route';
-import { SemesterRegistrationRoutes } from '../modules/semesterRegistration/semesterRegistration.route';
-import { OfferedCourseRoutes } from '../modules/offeredCourse/offeredCourse.route';
-import { AuthRoutes } from '../modules/Auth/auth.route';
-import { EnrolledCourseRoutes } from '../modules/EnrolledCourse/enrolledCourse.route';
+import { Router } from "express";
+import { AcademicDepartmentRoutes } from "../modules/academicDepartment/academicDepartment.route";
+import { AcademicFacultyRoutes } from "../modules/academicFaculty/academicFaculty.route";
+import { AcademicSemesterRoutes } from "../modules/academicSemester/academicSemester.route";
+import { AdminRoutes } from "../modules/Admin/admin.route";
+import { CourseRoutes } from "../modules/course/course.route";
+import { FacultyRoutes } from "../modules/Faculty/faculty.route";
+import { SemesterRegistrationRoutes } from "../modules/semesterRegistration/semesterRegistration.route";
+import { StudentRoutes } from "../modules/student/student.route";
+import { UserRoutes } from "../modules/user/user.route";
+// import { OfferedCourseRoutes } from '../modules/offeredCourse/offeredCourse.route';
+import { AuthRoutes } from "../modules/Auth/auth.route";
+// import { EnrolledCourseRoutes } from '../modules/EnrolledCourse/enrolledCourse.route';
 const router = Router();
 
 const moduleRoutes = [
   {
-    path: '/students',
+    path: "/students",
     route: StudentRoutes,
   },
   {
-    path: '/users',
+    path: "/users",
     route: UserRoutes,
   },
   {
-    path: '/academic-semesters',
+    path: "/academic-semesters",
     route: AcademicSemesterRoutes,
   },
   {
-    path: '/academic-faculties',
+    path: "/academic-faculties",
     route: AcademicFacultyRoutes,
   },
   {
-    path: '/academic-departments',
+    path: "/academic-departments",
     route: AcademicDepartmentRoutes,
   },
   {
-    path: '/faculties',
+    path: "/faculties",
     route: FacultyRoutes,
   },
   {
-    path: '/admins',
+    path: "/admins",
     route: AdminRoutes,
   },
   {
-    path: '/courses',
+    path: "/courses",
     route: CourseRoutes,
   },
   {
-    path: '/semesters-registrations',
+    path: "/semesters-registrations",
     route: SemesterRegistrationRoutes,
   },
+  // {
+  //   path: '/offered-courses',
+  //   route: OfferedCourseRoutes,
+  // },
   {
-    path: '/offered-courses',
-    route: OfferedCourseRoutes,
-  },
-  {
-    path: '/auth',
+    path: "/auth",
     route: AuthRoutes,
   },
-  {
-    path: '/enrolled-course',
-    route: EnrolledCourseRoutes,
-  },
+  // {
+  //   path: '/enrolled-course',
+  //   route: EnrolledCourseRoutes,
+  // },
 ];
 
 moduleRoutes.forEach(({ path, route }) => {

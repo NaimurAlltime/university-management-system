@@ -1,41 +1,41 @@
-import express from 'express';
-import { AcademicSemesterControllers } from './academicSemester.controller';
-import validateRequest from '../../middlewares/validateRequest';
-import { AcademicSemesterValidations } from './academicSemester.validation';
-import auth from '../../middlewares/auth';
-import { USER_ROLES } from '../user/user.constant';
+import express from "express";
+import validateRequest from "../../middlewares/validateRequest";
+import { AcademicSemesterControllers } from "./academicSemester.controller";
+import { AcademicSemesterValidations } from "./academicSemester.validation";
+// import auth from '../../middlewares/auth';
+// import { USER_ROLES } from '../user/user.constant';
 
 const route = express.Router();
 
 route.get(
-  '/',
-  auth(USER_ROLES.admin),
-  AcademicSemesterControllers.getAllAcademicSemesters,
+  "/",
+  // auth(USER_ROLES.admin),
+  AcademicSemesterControllers.getAllAcademicSemesters
 );
 route.post(
-  '/create-academic-semester',
-  auth(USER_ROLES.admin),
+  "/create-academic-semester",
+  // auth(USER_ROLES.admin),
   validateRequest(
-    AcademicSemesterValidations.createAcademicSemesterValidationSchema,
+    AcademicSemesterValidations.createAcademicSemesterValidationSchema
   ),
-  AcademicSemesterControllers.createAcademicSemester,
+  AcademicSemesterControllers.createAcademicSemester
 );
 route.get(
-  '/:id',
-  auth(USER_ROLES.admin),
-  AcademicSemesterControllers.getSingleAcademicSemester,
+  "/:id",
+  // auth(USER_ROLES.admin),
+  AcademicSemesterControllers.getSingleAcademicSemester
 );
 route.patch(
-  '/:id',
+  "/:id",
   validateRequest(
-    AcademicSemesterValidations.updateAcademicSemesterValidationSchema,
+    AcademicSemesterValidations.updateAcademicSemesterValidationSchema
   ),
-  AcademicSemesterControllers.updateAcademicSemester,
+  AcademicSemesterControllers.updateAcademicSemester
 );
 route.delete(
-  '/:id',
-  auth(USER_ROLES.admin),
-  AcademicSemesterControllers.deleteAcademicSemester,
+  "/:id",
+  // auth(USER_ROLES.admin),
+  AcademicSemesterControllers.deleteAcademicSemester
 );
 
 export const AcademicSemesterRoutes = route;
