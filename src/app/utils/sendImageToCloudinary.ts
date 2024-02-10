@@ -1,7 +1,7 @@
-import { v2 as cloudinary } from 'cloudinary';
-import config from '../config';
-import multer from 'multer';
+import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
+import multer from 'multer';
+import config from '../config';
 
 cloudinary.config({
   cloud_name: config.cloudinary_cloud_name,
@@ -9,20 +9,25 @@ cloudinary.config({
   api_secret: config.cloudinary_api_secret,
 });
 
-const sendImgToCloudinary = (imgName: string, path: string) => {
+export const sendImageToCloudinary = (
+  imageName: string,
+  path: string,
+): Promise<Record<string, unknown>> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload(
       path,
-      { public_id: imgName },
+      { public_id: imageName.trim() },
       function (error, result) {
         if (error) {
           reject(error);
         }
-        resolve(result);
-        // deleting the uploaded file from server
+        resolve(result as UploadApiResponse);
+        // delete a file asynchronously
         fs.unlink(path, (err) => {
           if (err) {
             console.log(err);
+          } else {
+            console.log('File is deleted.');
           }
         });
       },
@@ -41,5 +46,3 @@ const storage = multer.diskStorage({
 });
 
 export const upload = multer({ storage: storage });
-
-export default sendImgToCloudinary;

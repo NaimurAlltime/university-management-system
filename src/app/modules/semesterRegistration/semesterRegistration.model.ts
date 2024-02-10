@@ -1,14 +1,14 @@
-import { Schema, model } from 'mongoose';
-import { TSemesterRegistration } from './semesterRegistration.interface';
+import mongoose, { Schema } from 'mongoose';
 import { SemesterRegistrationStatus } from './semesterRegistration.constant';
+import { TSemesterRegistration } from './semesterRegistration.interface';
 
-const semesterRegistrationSchema = new Schema<TSemesterRegistration>(
+const semesterRegistrationSchema = new mongoose.Schema<TSemesterRegistration>(
   {
     academicSemester: {
       type: Schema.Types.ObjectId,
-      ref: 'AcademicSemester',
-      required: [true, 'Academic semester is required!'],
+      required: true,
       unique: true,
+      ref: 'AcademicSemester',
     },
     status: {
       type: String,
@@ -17,20 +17,18 @@ const semesterRegistrationSchema = new Schema<TSemesterRegistration>(
     },
     startDate: {
       type: Date,
-      required: [true, 'Start date is required!'],
+      required: true,
     },
     endDate: {
       type: Date,
-      required: [true, 'End date is required!'],
+      required: true,
     },
     minCredit: {
       type: Number,
-      required: [true, 'Minimum credit is required!'],
       default: 3,
     },
     maxCredit: {
       type: Number,
-      required: [true, 'Maximum credit is required!'],
       default: 15,
     },
   },
@@ -39,7 +37,7 @@ const semesterRegistrationSchema = new Schema<TSemesterRegistration>(
   },
 );
 
-export const SemesterRegistration = model<TSemesterRegistration>(
+export const SemesterRegistration = mongoose.model<TSemesterRegistration>(
   'SemesterRegistration',
   semesterRegistrationSchema,
 );

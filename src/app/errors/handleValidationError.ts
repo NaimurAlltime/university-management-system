@@ -12,11 +12,14 @@ const handleValidationError = (
       };
     },
   );
+
   const statusCode = 400;
+
   return {
     statusCode,
-    message: 'validation error on input data',
+    message: 'Validation Error',
     errorSources,
   };
 };
+
 export default handleValidationError;

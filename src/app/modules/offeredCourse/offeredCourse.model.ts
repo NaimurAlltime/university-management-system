@@ -1,62 +1,60 @@
-import { Schema, model } from 'mongoose';
-import { TOfferedCourse } from './offeredCourse.interface';
-import { Days } from './offeredCourse.constant';
+import mongoose, { Schema } from 'mongoose';
+import { Days } from './OfferedCourse.constant';
+import { TOfferedCourse } from './OfferedCourse.interface';
 
-const OfferCourseSchema = new Schema<TOfferedCourse>(
+const offeredCourseSchema = new mongoose.Schema<TOfferedCourse>(
   {
     semesterRegistration: {
       type: Schema.Types.ObjectId,
+      required: true,
       ref: 'SemesterRegistration',
-      required: [true, 'Semester registration is required'],
     },
     academicSemester: {
       type: Schema.Types.ObjectId,
+      required: true,
       ref: 'AcademicSemester',
-      required: [true, 'Academic semester is required'],
     },
     academicFaculty: {
       type: Schema.Types.ObjectId,
+      required: true,
       ref: 'AcademicFaculty',
-      required: [true, 'Academic faculty is required'],
     },
     academicDepartment: {
       type: Schema.Types.ObjectId,
+      required: true,
       ref: 'AcademicDepartment',
-      required: [true, 'Academic department is required'],
     },
     course: {
       type: Schema.Types.ObjectId,
+      required: true,
       ref: 'Course',
-      required: [true, 'Course is required'],
     },
     faculty: {
       type: Schema.Types.ObjectId,
+      required: true,
       ref: 'Faculty',
-      required: [true, 'Faculty is required'],
     },
     maxCapacity: {
       type: Number,
-      required: [true, 'Max capacity is required'],
+      required: true,
     },
     section: {
-      type: String,
-      trim: true,
-      required: [true, 'Section is required'],
+      type: Number,
+      required: true,
     },
     days: [
       {
         type: String,
         enum: Days,
-        required: [true, 'Days is required'],
       },
     ],
     startTime: {
       type: String,
-      required: [true, 'Start time is required'],
+      required: true,
     },
     endTime: {
       type: String,
-      required: [true, 'End time is required'],
+      required: true,
     },
   },
   {
@@ -64,7 +62,7 @@ const OfferCourseSchema = new Schema<TOfferedCourse>(
   },
 );
 
-export const OfferedCourse = model<TOfferedCourse>(
+export const OfferedCourse = mongoose.model<TOfferedCourse>(
   'OfferedCourse',
-  OfferCourseSchema,
+  offeredCourseSchema,
 );

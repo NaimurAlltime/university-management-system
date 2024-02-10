@@ -1,39 +1,50 @@
 import express from 'express';
-import validateRequest from '../../middlewares/validateRequest';
-import { AcademicFacultyControllers } from './academicFaculty.controller';
-import { AcademicFacultyValidations } from './academicFaculty.validation';
 import auth from '../../middlewares/auth';
-import { USER_ROLES } from '../user/user.constant';
+import validateRequest from '../../middlewares/validateRequest';
+import { USER_ROLE } from '../User/user.constant';
+import { AcademicFacultyControllers } from './academicFaculty.controller';
+import { AcademicFacultyValidation } from './academicFaculty.validation';
 
 const router = express.Router();
 
 router.post(
-  '/',
-  auth(USER_ROLES.admin),
-  validateRequest(AcademicFacultyValidations.academicFacultyValidationSchema),
+  '/create-academic-faculty',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  validateRequest(
+    AcademicFacultyValidation.createAcademicFacultyValidationSchema,
+  ),
   AcademicFacultyControllers.createAcademicFaculty,
 );
 
 router.get(
-  '/',
-  auth(USER_ROLES.admin, USER_ROLES.faculty),
-  AcademicFacultyControllers.getAllAcademicFaculties,
-);
-router.get(
   '/:id',
-  auth(USER_ROLES.admin, USER_ROLES.faculty),
+  auth(
+    USER_ROLE.superAdmin,
+    USER_ROLE.admin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
   AcademicFacultyControllers.getSingleAcademicFaculty,
 );
+
 router.patch(
   '/:id',
-  auth(USER_ROLES.admin),
-  validateRequest(AcademicFacultyValidations.academicFacultyValidationSchema),
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  validateRequest(
+    AcademicFacultyValidation.updateAcademicFacultyValidationSchema,
+  ),
   AcademicFacultyControllers.updateAcademicFaculty,
 );
-router.delete(
-  '/:id',
-  auth(USER_ROLES.admin),
-  AcademicFacultyControllers.deleteAcademicFaculty,
+
+router.get(
+  '/',
+  auth(
+    USER_ROLE.superAdmin,
+    USER_ROLE.admin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
+  AcademicFacultyControllers.getAllAcademicFaculties,
 );
 
 export const AcademicFacultyRoutes = router;

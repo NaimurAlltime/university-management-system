@@ -1,72 +1,18 @@
-import mongoose from 'mongoose';
-import { Student } from './student.model';
-import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
-import { User } from '../user/user.model';
-import { TStudent } from './student.interface';
+import mongoose from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
+import AppError from '../../errors/AppError';
+import { User } from '../User/user.model';
 import { studentSearchableFields } from './student.constant';
+import { TStudent } from './student.interface';
+import { Student } from './student.model';
 
-// * get all students
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
-  // const searchTerm = query?.searchTerm ? query?.searchTerm : '';
-  // const queryObj = { ...query };
-
-  // // searching
-  // const searchQuery = Student.find({
-  //   $or: [
-  //     'email',
-  //     'name.firstName',
-  //     'name.lastName',
-  //     'contactNumber',
-  //     'presentAddress',
-  //   ].map((key) => ({
-  //     [key]: {
-  //       $regex: searchTerm,
-  //       $options: 'i',
-  //     },
-  //   })),
-  // });
-
-  // // filtering
-  // excludeFields.forEach((el) => delete queryObj[el]);
-  // const filteredQuery = searchQuery
-  //   .find(queryObj)
-  //   .populate('admissionSemester')
-  // .populate({
-  //   path: 'academicDepartment',
-  //   populate: {
-  //     path: 'academicFaculty',
-  //   },
-  // });
-
-  // // sorting
-  // const sort = query?.sort ? (query?.sort as string) : '-createdAt';
-  // const sortQuery = filteredQuery.sort(sort);
-
-  // //limiting
-  // const limit = query?.limit ? Number(query?.limit) : 1;
-  // const page = query?.page ? Number(query?.page) : 1;
-  // const skip = (page - 1) * limit;
-
-  // const paginateQuery = sortQuery.skip(skip);
-  // const limitingQuery = paginateQuery.limit(limit);
-
-  // // fields limiting
-  // const fields = query?.fields
-  //   ? (query?.fields as string).split(',').join(' ')
-  //   : '-__v';
-  // const fieldsQuery = await limitingQuery.select(fields);
-
   const studentQuery = new QueryBuilder(
     Student.find()
+      .populate('user')
       .populate('admissionSemester')
-      .populate({
-        path: 'academicDepartment',
-        populate: {
-          path: 'academicFaculty',
-        },
-      }),
+      .populate('academicDepartment academicFaculty'),
     query,
   )
     .search(studentSearchableFields)
@@ -75,91 +21,108 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     .paginate()
     .fields();
 
+  const meta = await studentQuery.countTotal();
   const result = await studentQuery.modelQuery;
-  return result;
+
+  return {
+    meta,
+    result,
+  };
 };
 
-// * get single student
-const getSingleStudentsFromDB = async (id: string) => {
+const getSingleStudentFromDB = async (id: string) => {
   const result = await Student.findById(id)
     .populate('admissionSemester')
-    .populate({
-      path: 'academicDepartment',
-      populate: {
-        path: 'academicFaculty',
-      },
-    });
+    .populate('academicDepartment academicFaculty');
   return result;
 };
 
-// * update student
-const updateStudentsIntoDB = async (id: string, payload: Partial<TStudent>) => {
-  const { name, guardian, localGuardian, ...restData } = payload;
-  const modifiedData: Record<string, unknown> = { ...restData };
+const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
+  const { name, guardian, localGuardian, ...remainingStudentData } = payload;
+
+  const modifiedUpdatedData: Record<string, unknown> = {
+    ...remainingStudentData,
+  };
+
+  /*
+    guardain: {
+      fatherOccupation:"Teacher"
+    }
+
+    guardian.fatherOccupation = Teacher
+
+    name.firstName = 'Mezba'
+    name.lastName = 'Abedin'
+  */
 
   if (name && Object.keys(name).length) {
     for (const [key, value] of Object.entries(name)) {
-      modifiedData[`name.${key}`] = value;
+      modifiedUpdatedData[`name.${key}`] = value;
     }
   }
 
   if (guardian && Object.keys(guardian).length) {
     for (const [key, value] of Object.entries(guardian)) {
-      modifiedData[`guardian.${key}`] = value;
+      modifiedUpdatedData[`guardian.${key}`] = value;
     }
   }
 
   if (localGuardian && Object.keys(localGuardian).length) {
     for (const [key, value] of Object.entries(localGuardian)) {
-      modifiedData[`localGuardian.${key}`] = value;
+      modifiedUpdatedData[`localGuardian.${key}`] = value;
     }
   }
 
-  const result = await Student.findByIdAndUpdate(id, payload, {
+  const result = await Student.findByIdAndUpdate(id, modifiedUpdatedData, {
     new: true,
+    runValidators: true,
   });
   return result;
 };
 
-// * delete student
-const deleteStudentsFromDB = async (id: string) => {
+const deleteStudentFromDB = async (id: string) => {
   const session = await mongoose.startSession();
 
   try {
     session.startTransaction();
+
     const deletedStudent = await Student.findByIdAndUpdate(
       id,
       { isDeleted: true },
       { new: true, session },
     );
+
     if (!deletedStudent) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete student');
     }
 
     // get user _id from deletedStudent
     const userId = deletedStudent.user;
+
     const deletedUser = await User.findByIdAndUpdate(
       userId,
       { isDeleted: true },
       { new: true, session },
     );
+
     if (!deletedUser) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete user');
     }
 
     await session.commitTransaction();
     await session.endSession();
+
     return deletedStudent;
-  } catch (error) {
+  } catch (err) {
     await session.abortTransaction();
     await session.endSession();
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete student');
+    throw new Error('Failed to delete student');
   }
 };
 
 export const StudentServices = {
   getAllStudentsFromDB,
-  getSingleStudentsFromDB,
-  updateStudentsIntoDB,
-  deleteStudentsFromDB,
+  getSingleStudentFromDB,
+  updateStudentIntoDB,
+  deleteStudentFromDB,
 };

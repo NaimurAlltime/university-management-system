@@ -1,34 +1,30 @@
 /* eslint-disable no-unused-vars */
 import { Model } from 'mongoose';
-import { USER_ROLES } from './user.constant';
+import { USER_ROLE } from './user.constant';
 
 export interface TUser {
   id: string;
   email: string;
   password: string;
-  needsPasswordChange?: boolean;
+  needsPasswordChange: boolean;
   passwordChangedAt?: Date;
-  role: 'student' | 'admin' | 'faculty';
+  role: 'superAdmin' | 'admin' | 'student' | 'faculty';
   status: 'in-progress' | 'blocked';
   isDeleted: boolean;
 }
 
-export type NewUser = {
-  id: string;
-  role: string;
-  password: string;
-};
-
 export interface UserModel extends Model<TUser> {
-  isUserExistsByCustomId(id: string): Promise<TUser | null>;
+  //instance methods for checking if the user exist
+  isUserExistsByCustomId(id: string): Promise<TUser>;
+  //instance methods for checking if passwords are matched
   isPasswordMatched(
-    plainPassword: string,
+    plainTextPassword: string,
     hashedPassword: string,
   ): Promise<boolean>;
-  isJwtIssuedBeforePasswordChanged(
-    passwordChangedAt: Date,
-    jwtIssuedAt: number,
+  isJWTIssuedBeforePasswordChanged(
+    passwordChangedTimestamp: Date,
+    jwtIssuedTimestamp: number,
   ): boolean;
 }
 
-export type TUserRole = keyof typeof USER_ROLES;
+export type TUserRole = keyof typeof USER_ROLE;

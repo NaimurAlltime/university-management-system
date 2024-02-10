@@ -61,7 +61,7 @@ const adminSchema = new Schema<TAdmin, AdminModel>(
       type: String,
       required: [true, 'Emergency contact number is required'],
     },
-    bloodGroup: {
+    bloogGroup: {
       type: String,
       enum: {
         values: BloodGroup,
@@ -76,7 +76,7 @@ const adminSchema = new Schema<TAdmin, AdminModel>(
       type: String,
       required: [true, 'Permanent address is required'],
     },
-    profileImg: { type: String },
+    profileImg: { type: String, default: '' },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -91,16 +91,13 @@ const adminSchema = new Schema<TAdmin, AdminModel>(
 
 // generating full name
 adminSchema.virtual('fullName').get(function () {
-  if (this?.name?.middleName) {
-    return (
-      this?.name?.firstName +
-      ' ' +
-      this?.name?.middleName +
-      ' ' +
-      this?.name?.lastName
-    );
-  }
-  return this?.name?.firstName + ' ' + this?.name?.lastName;
+  return (
+    this?.name?.firstName +
+    '' +
+    this?.name?.middleName +
+    '' +
+    this?.name?.lastName
+  );
 });
 
 // filter out deleted documents

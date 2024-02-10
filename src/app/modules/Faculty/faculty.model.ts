@@ -2,29 +2,24 @@ import { Schema, model } from 'mongoose';
 import { BloodGroup, Gender } from './faculty.constant';
 import { FacultyModel, TFaculty, TUserName } from './faculty.interface';
 
-const userNameSchema = new Schema<TUserName>(
-  {
-    firstName: {
-      type: String,
-      required: [true, 'First Name is required'],
-      trim: true,
-      maxlength: [20, 'Name can not be more than 20 characters'],
-    },
-    middleName: {
-      type: String,
-      trim: true,
-    },
-    lastName: {
-      type: String,
-      trim: true,
-      required: [true, 'Last Name is required'],
-      maxlength: [20, 'Name can not be more than 20 characters'],
-    },
+const userNameSchema = new Schema<TUserName>({
+  firstName: {
+    type: String,
+    required: [true, 'First Name is required'],
+    trim: true,
+    maxlength: [20, 'Name can not be more than 20 characters'],
   },
-  {
-    _id: false,
+  middleName: {
+    type: String,
+    trim: true,
   },
-);
+  lastName: {
+    type: String,
+    trim: true,
+    required: [true, 'Last Name is required'],
+    maxlength: [20, 'Name can not be more than 20 characters'],
+  },
+});
 
 const facultySchema = new Schema<TFaculty, FacultyModel>(
   {
@@ -66,7 +61,7 @@ const facultySchema = new Schema<TFaculty, FacultyModel>(
       type: String,
       required: [true, 'Emergency contact number is required'],
     },
-    bloodGroup: {
+    bloogGroup: {
       type: String,
       enum: {
         values: BloodGroup,
@@ -81,11 +76,16 @@ const facultySchema = new Schema<TFaculty, FacultyModel>(
       type: String,
       required: [true, 'Permanent address is required'],
     },
-    profileImg: { type: String },
+    profileImg: { type: String, default: '' },
     academicDepartment: {
       type: Schema.Types.ObjectId,
-      required: [true, 'Academic department id is required'],
+      required: [true, 'Acadcemic Department is required'],
       ref: 'AcademicDepartment',
+    },
+    academicFaculty: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Acadcemic Faculty is required'],
+      ref: 'AcademicFaculty',
     },
     isDeleted: {
       type: Boolean,
@@ -101,16 +101,13 @@ const facultySchema = new Schema<TFaculty, FacultyModel>(
 
 // generating full name
 facultySchema.virtual('fullName').get(function () {
-  if (this?.name?.middleName) {
-    return (
-      this?.name?.firstName +
-      ' ' +
-      this?.name?.middleName +
-      ' ' +
-      this?.name?.lastName
-    );
-  }
-  return this?.name?.firstName + ' ' + this?.name?.lastName;
+  return (
+    this?.name?.firstName +
+    '' +
+    this?.name?.middleName +
+    '' +
+    this?.name?.lastName
+  );
 });
 
 // filter out deleted documents

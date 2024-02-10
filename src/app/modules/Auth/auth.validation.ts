@@ -1,61 +1,52 @@
 import { z } from 'zod';
 
-const LoginUserValidationSchema = z.object({
+const loginValidationSchema = z.object({
   body: z.object({
-    id: z.string({
-      required_error: 'User id is required',
-      invalid_type_error: 'User id must be a string',
-    }),
-    password: z.string({
-      required_error: 'User password is required',
-      invalid_type_error: 'User password must be a string',
-    }),
+    id: z.string({ required_error: 'Id is required.' }),
+    password: z.string({ required_error: 'Password is required' }),
   }),
 });
 
 const changePasswordValidationSchema = z.object({
   body: z.object({
     oldPassword: z.string({
-      required_error: 'old password is required',
+      required_error: 'Old password is required',
     }),
-    newPassword: z.string({
-      required_error: 'New password is required',
-      invalid_type_error: 'New password must be a string',
-    }),
+    newPassword: z.string({ required_error: 'Password is required' }),
   }),
 });
 
 const refreshTokenValidationSchema = z.object({
   cookies: z.object({
     refreshToken: z.string({
-      required_error: 'Refresh token is required',
+      required_error: 'Refresh token is required!',
     }),
   }),
 });
 
-const forgotPasswordValidationSchema = z.object({
+const forgetPasswordValidationSchema = z.object({
   body: z.object({
     id: z.string({
-      required_error: 'User id is required',
+      required_error: 'User id is required!',
     }),
   }),
-})
+});
+
 const resetPasswordValidationSchema = z.object({
   body: z.object({
     id: z.string({
-      required_error: 'User id is required',
+      required_error: 'User id is required!',
     }),
     newPassword: z.string({
-      required_error: 'User password is required',
-      invalid_type_error: 'User password must be a string',
+      required_error: 'User password is required!',
     }),
   }),
-})
+});
 
-export const AuthValidations = {
-  LoginUserValidationSchema,
+export const AuthValidation = {
+  loginValidationSchema,
   changePasswordValidationSchema,
   refreshTokenValidationSchema,
-  forgotPasswordValidationSchema,
+  forgetPasswordValidationSchema,
   resetPasswordValidationSchema,
 };

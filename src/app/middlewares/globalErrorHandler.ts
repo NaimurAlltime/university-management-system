@@ -1,49 +1,50 @@
-import { NextFunction, ErrorRequestHandler } from 'express';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
+import { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
-import { TErrorSources } from '../interface/error';
 import config from '../config';
-import { handleZodError } from '../errors/handleZodError';
-import handleValidationError from '../errors/handleValidationError';
-import { handleCastError } from '../errors/handleCastError';
 import AppError from '../errors/AppError';
+import handleCastError from '../errors/handleCastError';
+import handleDuplicateError from '../errors/handleDuplicateError';
+import handleValidationError from '../errors/handleValidationError';
+import handleZodError from '../errors/handleZodError';
+import { TErrorSources } from '../interface/error';
 
-const globalErrorHandler: ErrorRequestHandler = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  err,
-  req,
-  res,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-  next: NextFunction,
-) => {
-  // initialize statusCode, message and errorSources with default values
-  let statusCode = err.statusCode || 500;
-  let message = err.message || 'Something went wrong!';
+const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  console.log(err.statusCode);
+  //setting default values
+  let statusCode = 500;
+  let message = 'Something went wrong!';
   let errorSources: TErrorSources = [
     {
       path: '',
-      message: err.message || 'Something went wrong!',
+      message: 'Something went wrong',
     },
   ];
 
-  // handle validation error
   if (err instanceof ZodError) {
-    const simplifyError = handleZodError(err);
-    statusCode = simplifyError?.statusCode;
-    message = simplifyError?.message;
-    errorSources = simplifyError?.errorSources;
-  } else if (err.name === 'ValidationError') {
-    const simplifyError = handleValidationError(err);
-    statusCode = simplifyError?.statusCode;
-    message = simplifyError?.message;
-    errorSources = simplifyError?.errorSources;
-  } else if (err.name === 'CastError') {
-    const simplifyError = handleCastError(err);
-    statusCode = simplifyError?.statusCode;
-    message = simplifyError?.message;
-    errorSources = simplifyError?.errorSources;
+    const simplifiedError = handleZodError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSources = simplifiedError?.errorSources;
+  } else if (err?.name === 'ValidationError') {
+    const simplifiedError = handleValidationError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSources = simplifiedError?.errorSources;
+  } else if (err?.name === 'CastError') {
+    const simplifiedError = handleCastError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSources = simplifiedError?.errorSources;
+  } else if (err?.code === 11000) {
+    const simplifiedError = handleDuplicateError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSources = simplifiedError?.errorSources;
   } else if (err instanceof AppError) {
     statusCode = err?.statusCode;
-    message = err?.message;
+    message = err.message;
     errorSources = [
       {
         path: '',
@@ -51,7 +52,7 @@ const globalErrorHandler: ErrorRequestHandler = (
       },
     ];
   } else if (err instanceof Error) {
-    message = err?.message;
+    message = err.message;
     errorSources = [
       {
         path: '',
@@ -59,14 +60,26 @@ const globalErrorHandler: ErrorRequestHandler = (
       },
     ];
   }
-  // send response
+
+  //ultimate return
   return res.status(statusCode).json({
     success: false,
     message,
     errorSources,
-    // err,
+    err,
     stack: config.NODE_ENV === 'development' ? err?.stack : null,
   });
 };
 
 export default globalErrorHandler;
+
+//pattern
+/*
+success
+message
+errorSources:[
+  path:'',
+  message:''
+]
+stack
+*/

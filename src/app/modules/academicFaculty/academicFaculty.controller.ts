@@ -7,57 +7,54 @@ const createAcademicFaculty = catchAsync(async (req, res) => {
   const result = await AcademicFacultyServices.createAcademicFacultyIntoDB(
     req.body,
   );
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Academic faculty created successfully!',
+    message: 'Academic faculty is created successfully',
     data: result,
   });
 });
 
 const getAllAcademicFaculties = catchAsync(async (req, res) => {
-  const result = await AcademicFacultyServices.getAllAcademicFacultiesFromDB();
+  const result = await AcademicFacultyServices.getAllAcademicFacultiesFromDB(
+    req.query,
+  );
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Academic faculties data retrieved successfully!',
-    data: result,
+    message: 'Academic faculties are retrieved successfully',
+    meta: result.meta,
+    data: result.result,
   });
 });
 
 const getSingleAcademicFaculty = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const { facultyId } = req.params;
+
   const result =
-    await AcademicFacultyServices.getSingleAcademicFacultyFromDB(id);
+    await AcademicFacultyServices.getSingleAcademicFacultyFromDB(facultyId);
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Academic faculty data retrieved successfully!',
+    message: 'Academic faculty is retrieved successfully',
     data: result,
   });
 });
 
 const updateAcademicFaculty = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const { facultyId } = req.params;
   const result = await AcademicFacultyServices.updateAcademicFacultyIntoDB(
-    id,
+    facultyId,
     req.body,
   );
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Academic faculty updated successfully!',
-    data: result,
-  });
-});
 
-const deleteAcademicFaculty = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await AcademicFacultyServices.deleteAcademicFacultyFromDB(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Academic faculty deleted successfully!',
+    message: 'Academic faculty is updated successfully',
     data: result,
   });
 });
@@ -67,5 +64,4 @@ export const AcademicFacultyControllers = {
   getAllAcademicFaculties,
   getSingleAcademicFaculty,
   updateAcademicFaculty,
-  deleteAcademicFaculty,
 };

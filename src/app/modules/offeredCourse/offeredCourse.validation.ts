@@ -1,100 +1,72 @@
 import { z } from 'zod';
-import { Days } from './offeredCourse.constant';
-const timeStringSchema = z
-  .string({
-    required_error: 'Start time and end time is required',
-    invalid_type_error: 'Start time and end time must be a string',
-  })
-  .refine(
-    (time) => {
-      const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-      return regex.test(time);
-    },
-    {
-      message: 'The time must be in hh:mm format (00:00 - 23:59)',
-    },
-  );
+import { Days } from './OfferedCourse.constant';
 
-const createOfferCourseValidationSchema = z.object({
+const timeStringSchema = z.string().refine(
+  (time) => {
+    const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/; // 00-09 10-19 20-23
+    return regex.test(time);
+  },
+  {
+    message: 'Invalid time format , expected "HH:MM" in 24 hours format',
+  },
+);
+
+const createOfferedCourseValidationSchema = z.object({
   body: z
     .object({
-      semesterRegistration: z.string({
-        required_error: 'Semester registration is required',
-        invalid_type_error: 'Semester registration must be a string',
-      }),
-      academicFaculty: z.string({
-        required_error: 'Academic faculty is required',
-        invalid_type_error: 'Academic faculty must be a string',
-      }),
-      academicDepartment: z.string({
-        required_error: 'Academic department is required',
-        invalid_type_error: 'Academic department must be a string',
-      }),
-      course: z.string({
-        required_error: 'Course is required',
-        invalid_type_error: 'Course must be a string',
-      }),
-      faculty: z.string({
-        required_error: 'Faculty is required',
-        invalid_type_error: 'Faculty must be a string',
-      }),
-      maxCapacity: z.number({
-        required_error: 'Max capacity is required',
-        invalid_type_error: 'Max capacity must be a number',
-      }),
-      section: z.string({
-        required_error: 'Section is required',
-        invalid_type_error: 'Section must be a string',
-      }),
-      days: z.array(z.enum([...Days] as [string, ...string[]]), {
-        required_error: 'Days is required',
-        invalid_type_error: 'Days must be an array',
-      }),
-      startTime: timeStringSchema,
-      endTime: timeStringSchema,
-    })
-    .refine(
-      ({ startTime, endTime }) => {
-        const start = new Date(`2003-03-24T${startTime}:00`);
-        const end = new Date(`2003-03-24T${endTime}:00`);
-        return start < end;
-      },
-      {
-        message: 'Start time must be before end time',
-      },
-    ),
-});
-
-const updateOfferCourseValidationSchema = z.object({
-  body: z
-    .object({
-      faculty: z.string({
-        invalid_type_error: 'Faculty must be a string',
-        required_error: 'Faculty is required',
-      }),
-      maxCapacity: z.number({
-        invalid_type_error: 'Max capacity must be a number',
-        required_error: 'Max capacity is required',
-      }),
+      semesterRegistration: z.string(),
+      academicFaculty: z.string(),
+      academicDepartment: z.string(),
+      course: z.string(),
+      faculty: z.string(),
+      section: z.number(),
+      maxCapacity: z.number(),
       days: z.array(z.enum([...Days] as [string, ...string[]])),
-      startTime: timeStringSchema,
+      startTime: timeStringSchema, // HH: MM   00-23: 00-59
       endTime: timeStringSchema,
     })
     .refine(
-      ({ startTime, endTime }) => {
-        const start = new Date(`2003-03-24T${startTime}:00`);
-        const end = new Date(`2003-03-24T${endTime}:00`);
-        return start < end;
+      (body) => {
+        // startTime : 10:30  => 1970-01-01T10:30
+        //endTime : 12:30  =>  1970-01-01T12:30
+
+        const start = new Date(`1970-01-01T${body.startTime}:00`);
+        const end = new Date(`1970-01-01T${body.endTime}:00`);
+
+        return end > start;
       },
       {
-        message: 'Start time must be before end time',
+        message: 'Start time should be before End time !  ',
       },
     ),
 });
 
-const offeredCourseValidations = {
-  createOfferCourseValidationSchema,
-  updateOfferCourseValidationSchema,
-};
+const updateOfferedCourseValidationSchema = z.object({
+  body: z
+    .object({
+      faculty: z.string(),
+      maxCapacity: z.number(),
+      days: z.array(z.enum([...Days] as [string, ...string[]])),
+      startTime: timeStringSchema, // HH: MM   00-23: 00-59
+      endTime: timeStringSchema,
+    })
+    .refine(
+      (body) => {
+        // startTime : 10:30  => 1970-01-01T10:30
+        //endTime : 12:30  =>  1970-01-01T12:30
 
-export default offeredCourseValidations;
+        const start = new Date(`1970-01-01T${body.startTime}:00`);
+        const end = new Date(`1970-01-01T${body.endTime}:00`);
+
+        return end > start;
+      },
+      {
+        message: 'Start time should be before End time !  ',
+      },
+    ),
+});
+
+export const OfferedCourseValidations = {
+  createOfferedCourseValidationSchema,
+  updateOfferedCourseValidationSchema,
+};

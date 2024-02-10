@@ -3,14 +3,14 @@ import { BloodGroup, Gender } from './admin.constant';
 
 const createUserNameValidationSchema = z.object({
   firstName: z.string().min(1).max(20),
-  middleName: z.string().max(20).optional(),
+  middleName: z.string().max(20),
   lastName: z.string().max(20),
 });
 
 export const createAdminValidationSchema = z.object({
   body: z.object({
     password: z.string().max(20).optional(),
-    adminData: z.object({
+    admin: z.object({
       designation: z.string(),
       name: createUserNameValidationSchema,
       gender: z.enum([...Gender] as [string, ...string[]]),
@@ -18,7 +18,7 @@ export const createAdminValidationSchema = z.object({
       email: z.string().email(),
       contactNo: z.string(),
       emergencyContactNo: z.string(),
-      bloodGroup: z.enum([...BloodGroup] as [string, ...string[]]),
+      bloogGroup: z.enum([...BloodGroup] as [string, ...string[]]),
       presentAddress: z.string(),
       permanentAddress: z.string(),
       // profileImg: z.string(),
@@ -42,10 +42,10 @@ export const updateAdminValidationSchema = z.object({
       email: z.string().email().optional(),
       contactNo: z.string().optional(),
       emergencyContactNo: z.string().optional(),
-      bloodGroup: z.enum([...BloodGroup] as [string, ...string[]]).optional(),
+      bloogGroup: z.enum([...BloodGroup] as [string, ...string[]]).optional(),
       presentAddress: z.string().optional(),
       permanentAddress: z.string().optional(),
-      profileImg: z.string().optional(),
+      // profileImg: z.string().optional(),
     }),
   }),
 });

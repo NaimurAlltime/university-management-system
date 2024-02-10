@@ -1,19 +1,35 @@
 import express from 'express';
-import { StudentControllers } from './student.controller';
-import validateRequest from '../../middlewares/validateRequest';
-import { studentValidations } from './student.validation';
 import auth from '../../middlewares/auth';
-import { USER_ROLES } from '../user/user.constant';
-const route = express.Router();
+import validateRequest from '../../middlewares/validateRequest';
+import { USER_ROLE } from '../User/user.constant';
+import { StudentControllers } from './student.controller';
+import { updateStudentValidationSchema } from './student.validation';
 
-route.get('/', auth(USER_ROLES.admin), StudentControllers.getAllStudent);
-route.get('/:id', auth(USER_ROLES.admin), StudentControllers.getSingleStudent);
-route.patch(
+const router = express.Router();
+
+router.get(
+  '/',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  StudentControllers.getAllStudents,
+);
+
+router.get(
   '/:id',
-  auth(USER_ROLES.admin),
-  validateRequest(studentValidations.updateStudentValidationSchema),
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.faculty),
+  StudentControllers.getSingleStudent,
+);
+
+router.patch(
+  '/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  validateRequest(updateStudentValidationSchema),
   StudentControllers.updateStudent,
 );
-route.delete('/:id', auth(USER_ROLES.admin), StudentControllers.deleteStudent);
 
-export const StudentRoutes = route;
+router.delete(
+  '/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  StudentControllers.deleteStudent,
+);
+
+export const StudentRoutes = router;

@@ -1,41 +1,50 @@
 import express from 'express';
-import validateRequest from '../../middlewares/validateRequest';
-import {
-  AcademicDepartmentValidationSchema,
-  UpdateAcademicDepartmentValidationSchema,
-} from './academicDepartment.validation';
-import { AcademicDepartmentController } from './academicDepartment.controller';
-import { USER_ROLES } from '../user/user.constant';
 import auth from '../../middlewares/auth';
+import validateRequest from '../../middlewares/validateRequest';
+import { USER_ROLE } from '../User/user.constant';
+import { AcademicDepartmentControllers } from './academicDepartment.controller';
+import { AcademicDepartmentValidation } from './academicDepartment.validation';
 
-const route = express.Router();
+const router = express.Router();
 
-route.post(
+router.post(
+  '/create-academic-department',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  validateRequest(
+    AcademicDepartmentValidation.createAcademicDepartmentValidationSchema,
+  ),
+  AcademicDepartmentControllers.createAcademicDepartmemt,
+);
+
+router.get(
+  '/:departmentId',
+  auth(
+    USER_ROLE.superAdmin,
+    USER_ROLE.admin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
+  AcademicDepartmentControllers.getSingleAcademicDepartment,
+);
+
+router.patch(
+  '/:departmentId',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  validateRequest(
+    AcademicDepartmentValidation.updateAcademicDepartmentValidationSchema,
+  ),
+  AcademicDepartmentControllers.updateAcademicDeartment,
+);
+
+router.get(
   '/',
-  auth(USER_ROLES.admin),
-  validateRequest(AcademicDepartmentValidationSchema),
-  AcademicDepartmentController.createAcademicDepartment,
-);
-route.get(
-  '/',
-  auth(USER_ROLES.admin, USER_ROLES.faculty),
-  AcademicDepartmentController.getAllAcademicDepartments,
-);
-route.get(
-  '/:id',
-  auth(USER_ROLES.admin, USER_ROLES.faculty),
-  AcademicDepartmentController.getSingleAcademicDepartment,
-);
-route.patch(
-  '/:id',
-  auth(USER_ROLES.admin),
-  validateRequest(UpdateAcademicDepartmentValidationSchema),
-  AcademicDepartmentController.updateAcademicDepartment,
-);
-route.delete(
-  '/:id',
-  auth(USER_ROLES.admin),
-  AcademicDepartmentController.deleteAcademicDepartment,
+  auth(
+    USER_ROLE.superAdmin,
+    USER_ROLE.admin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
+  AcademicDepartmentControllers.getAllAcademicDepartments,
 );
 
-export const AcademicDepartmentRoutes = route;
+export const AcademicDepartmentRoutes = router;
