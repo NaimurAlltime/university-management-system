@@ -1,8 +1,10 @@
 import { Types } from 'mongoose';
 
+export type TSemesterRegistrationStatus = 'UPCOMING' | 'ONGOING' | 'ENDED';
+
 export type TSemesterRegistration = {
   academicSemester: Types.ObjectId;
-  status: 'UPCOMING' | 'ONGOING' | 'ENDED';
+  status: TSemesterRegistrationStatus;
   startDate: Date;
   endDate: Date;
   minCredit: number;
