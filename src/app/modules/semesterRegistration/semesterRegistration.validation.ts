@@ -1,29 +1,22 @@
 import { z } from 'zod';
-import { SemesterRegistrationStatus } from './semesterRegistration.constant';
 
-export const createSemesterRegistrationValidationSchema = z.object({
+export const createSemesterRegistrationZodSchema = z.object({
   body: z.object({
-    academicSemester: z.string({ required_error: 'Academic semester is required' }),
-    status: z.enum([...SemesterRegistrationStatus] as [string, ...string[]]).optional(),
-    startDate: z.string({ required_error: 'Start date is required' }),
-    endDate: z.string({ required_error: 'End date is required' }),
-    minCredit: z.number({ invalid_type_error: 'minCredit must be a number' }),
-    maxCredit: z.number({ invalid_type_error: 'maxCredit must be a number' }),
+    academicSemester: z.string({ required_error: 'academicSemester is required' }),
+    status: z.enum(['UPCOMING', 'ONGOING', 'ENDED']).optional(),
+    startDate: z.string(),
+    endDate: z.string(),
+    minCredit: z.number().int().nonnegative(),
+    maxCredit: z.number().int().positive(),
   }),
 });
 
-export const updateSemesterRegistrationValidationSchema = z.object({
+export const updateSemesterRegistrationZodSchema = z.object({
   body: z.object({
-    academicSemester: z.string().optional(),
-    status: z.enum([...SemesterRegistrationStatus] as [string, ...string[]]).optional(),
+    status: z.enum(['UPCOMING', 'ONGOING', 'ENDED']).optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
-    minCredit: z.number().optional(),
-    maxCredit: z.number().optional(),
+    minCredit: z.number().int().nonnegative().optional(),
+    maxCredit: z.number().int().positive().optional(),
   }),
 });
-
-export const SemesterRegistrationValidations = {
-  createSemesterRegistrationValidationSchema,
-  updateSemesterRegistrationValidationSchema,
-};

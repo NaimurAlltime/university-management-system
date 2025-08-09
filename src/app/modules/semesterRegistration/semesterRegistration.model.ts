@@ -1,5 +1,4 @@
 import { Schema, model } from 'mongoose';
-import { SemesterRegistrationStatus } from './semesterRegistration.constant';
 import { TSemesterRegistration } from './semesterRegistration.interface';
 
 const semesterRegistrationSchema = new Schema<TSemesterRegistration>(
@@ -7,59 +6,37 @@ const semesterRegistrationSchema = new Schema<TSemesterRegistration>(
     academicSemester: {
       type: Schema.Types.ObjectId,
       ref: 'AcademicSemester',
-      required: [true, 'Academic semester is required'],
+      required: true,
+      unique: true,
     },
     status: {
       type: String,
-      enum: {
-        values: SemesterRegistrationStatus,
-        message: '{VALUE} is not a valid semester registration status',
-      },
+      enum: ['UPCOMING', 'ONGOING', 'ENDED'],
+      required: true,
       default: 'UPCOMING',
     },
-    startDate: {
-      type: Date,
-      required: [true, 'Start date is required'],
-    },
-    endDate: {
-      type: Date,
-      required: [true, 'End date is required'],
-    },
-    minCredit: {
-      type: Number,
-      required: [true, 'Minimum credit is required'],
-      min: [1, 'Minimum credit must be at least 1'],
-    },
-    maxCredit: {
-      type: Number,
-      required: [true, 'Maximum credit is required'],
-      min: [1, 'Maximum credit must be at least 1'],
-    },
+    startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true },
+    minCredit: { type: Number, required: true },
+    maxCredit: { type: Number, required: true },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-// Basic sanity check: minCredit <= maxCredit
+// Basic validation constraints
 semesterRegistrationSchema.pre('save', function (next) {
+  if (this.startDate >= this.endDate) {
+    return next(new Error('startDate must be before endDate'));
+  }
   if (this.minCredit > this.maxCredit) {
-    next(new Error('Minimum credit cannot be greater than maximum credit'));
-  } else {
-    next();
+    return next(new Error('minCredit cannot be greater than maxCredit'));
   }
-});
-
-semesterRegistrationSchema.pre('findOneAndUpdate', function (next) {
-  const update: any = this.getUpdate() || {};
-  const min = update.minCredit;
-  const max = update.maxCredit;
-
-  if (min !== undefined && max !== undefined && min > max) {
-    return next(new Error('Minimum credit cannot be greater than maximum credit'));
-  }
-  next();
+  return next();
 });
 
 export const SemesterRegistration = model<TSemesterRegistration>(
   'SemesterRegistration',
-  semesterRegistrationSchema,
+  semesterRegistrationSchema
 );

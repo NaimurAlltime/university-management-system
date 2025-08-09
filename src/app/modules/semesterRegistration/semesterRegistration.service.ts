@@ -1,54 +1,50 @@
-import QueryBuilder from '../../builder/QueryBuilder';
+import { FilterQuery } from 'mongoose';
 import { SemesterRegistration } from './semesterRegistration.model';
 import { TSemesterRegistration } from './semesterRegistration.interface';
 
-const createSemesterRegistrationIntoDB = async (payload: TSemesterRegistration) => {
-  const result = await SemesterRegistration.create(payload);
-  return result;
-};
+export const SemesterRegistrationService = {
+  async create(payload: TSemesterRegistration) {
+    return SemesterRegistration.create(payload);
+  },
 
-const getAllSemesterRegistrationsFromDB = async (query: Record<string, unknown>) => {
-  const builder = new QueryBuilder(
-    SemesterRegistration.find().populate('academicSemester'),
-    query,
-  )
-    .search(['status']) // optional: allow search by status
-    .filter()
-    .sort()
-    .paginate()
-    .fields();
+  async getAll(query: Record<string, unknown>) {
+    const page = Number(query.page ?? 1);
+    const limit = Number(query.limit ?? 10);
+    const skip = (page - 1) * limit;
 
-  const result = await builder.modelQuery;
-  const meta = await builder.countTotal();
+    const filter: FilterQuery<TSemesterRegistration> = {};
+    if (query.status) filter.status = query.status as any;
+    if (query.academicSemester) filter.academicSemester = query.academicSemester as any;
 
-  return { result, meta };
-};
+    const [data, total] = await Promise.all([
+      SemesterRegistration.find(filter)
+        .populate('academicSemester')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      SemesterRegistration.countDocuments(filter),
+    ]);
 
-const getSingleSemesterRegistrationFromDB = async (id: string) => {
-  const result = await SemesterRegistration.findById(id).populate('academicSemester');
-  return result;
-};
+    return {
+      data,
+      meta: { total, page, limit },
+    };
+  },
 
-const updateSemesterRegistrationIntoDB = async (
-  id: string,
-  payload: Partial<TSemesterRegistration>,
-) => {
-  const result = await SemesterRegistration.findOneAndUpdate({ _id: id }, payload, {
-    new: true,
-    runValidators: true,
-  });
-  return result;
-};
+  async getById(id: string) {
+    return SemesterRegistration.findById(id).populate('academicSemester');
+  },
 
-const deleteSemesterRegistrationFromDB = async (id: string) => {
-  const result = await SemesterRegistration.findByIdAndDelete(id);
-  return result;
-};
-
-export const SemesterRegistrationServices = {
-  createSemesterRegistrationIntoDB,
-  getAllSemesterRegistrationsFromDB,
-  getSingleSemesterRegistrationFromDB,
-  updateSemesterRegistrationIntoDB,
-  deleteSemesterRegistrationFromDB,
+  async update(id: string, payload: Partial<TSemesterRegistration>) {
+    return SemesterRegistration.findByIdAndUpdate(
+      id,
+      {
+        ...payload,
+        // convert date strings to Date if provided
+        ...(payload.startDate ? { startDate: new Date(payload.startDate) } : {}),
+        ...(payload.endDate ? { endDate: new Date(payload.endDate) } : {}),
+      },
+      { new: true }
+    ).populate('academicSemester');
+  },
 };

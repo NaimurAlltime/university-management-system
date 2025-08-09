@@ -20,7 +20,7 @@ const getAllOfferedCourses = catchAsync(async (req, res) => {
     success: true,
     message: 'Offered courses retrieved successfully',
     data: result.data,
-    meta: result.meta,
+    // meta: result.meta,
   });
 });
 
