@@ -1,35 +1,35 @@
-import express from 'express';
-import auth from '../../middlewares/auth';
-import validateRequest from '../../middlewares/validateRequest';
-import { USER_ROLE } from '../User/user.constant';
-import { AdminControllers } from './admin.controller';
-import { updateAdminValidationSchema } from './admin.validation';
+import express from "express"
+import auth from "../../middlewares/auth"
+import validateRequest from "../../middlewares/validateRequest"
+import { USER_ROLE } from "../User/user.constant"
+import { AdminControllers } from "./admin.controller"
+import { updateAdminValidationSchema } from "./admin.validation"
 
-const router = express.Router();
+const router = express.Router()
 
-router.get(
-  '/',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
-  AdminControllers.getAllAdmins,
-);
+router.get("/", auth(USER_ROLE.superAdmin, USER_ROLE.admin), AdminControllers.getAllAdmins)
 
-router.get(
-  '/:id',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
-  AdminControllers.getSingleAdmin,
-);
+router.get("/enrollments", auth(USER_ROLE.admin, USER_ROLE.superAdmin), AdminControllers.getAllEnrollments)
+
+router.get("/enrollment-stats", auth(USER_ROLE.admin, USER_ROLE.superAdmin), AdminControllers.getEnrollmentStats)
+
+router.post("/enroll-student", auth(USER_ROLE.admin, USER_ROLE.superAdmin), AdminControllers.enrollStudent)
+
+router.delete(
+  "/unenroll-student/:enrollmentId",
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  AdminControllers.unenrollStudent,
+)
+
+router.get("/:id", auth(USER_ROLE.superAdmin, USER_ROLE.admin), AdminControllers.getSingleAdmin)
 
 router.patch(
-  '/:id',
+  "/:id",
   auth(USER_ROLE.superAdmin),
   validateRequest(updateAdminValidationSchema),
   AdminControllers.updateAdmin,
-);
+)
 
-router.delete(
-  '/:adminId',
-  auth(USER_ROLE.superAdmin),
-  AdminControllers.deleteAdmin,
-);
+router.delete("/:adminId", auth(USER_ROLE.superAdmin), AdminControllers.deleteAdmin)
 
-export const AdminRoutes = router;
+export const AdminRoutes = router
