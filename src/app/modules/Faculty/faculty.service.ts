@@ -84,7 +84,7 @@ const deleteFacultyFromDB = async (id: string) => {
 
 const getFacultyDashboardFromDB = async (userId: string) => {
   // Get faculty info
-  const faculty = await Faculty.findOne({ user: userId }).populate("academicDepartment academicFaculty")
+  const faculty = await Faculty.findOne({ id: userId }).populate("academicDepartment academicFaculty")
 
   if (!faculty) {
     throw new AppError(httpStatus.NOT_FOUND, "Faculty not found")
@@ -118,7 +118,7 @@ const getFacultyDashboardFromDB = async (userId: string) => {
 }
 
 const getMyCoursesFromDB = async (userId: string, query: Record<string, unknown>) => {
-  const faculty = await Faculty.findOne({ user: userId })
+  const faculty = await Faculty.findOne({ id: userId })
 
   if (!faculty) {
     throw new AppError(httpStatus.NOT_FOUND, "Faculty not found")
@@ -159,7 +159,7 @@ const getMyStudentsFromDB = async (
   courseId: string,
   query: Record<string, unknown>,
 ) => {
-  const faculty = await Faculty.findOne({ user: userId })
+  const faculty = await Faculty.findOne({ id: userId })
 
   if (!faculty) {
     throw new AppError(httpStatus.NOT_FOUND, "Faculty not found")
