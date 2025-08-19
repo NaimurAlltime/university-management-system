@@ -135,7 +135,16 @@ const createEnrolledCourseIntoDB = async (userId: string, payload: { offeredCour
 }
 
 const getMyEnrolledCoursesFromDB = async (studentId: string, query: Record<string, unknown>) => {
-  const student = await Student.findOne({ user: studentId })
+  let student
+
+  // Check if studentId is a valid ObjectId (24 character hex string)
+  if (mongoose.Types.ObjectId.isValid(studentId) && studentId.length === 24) {
+    // If it's a valid ObjectId, it's likely a user ID
+    student = await Student.findOne({ user: studentId })
+  } else {
+    // If it's not a valid ObjectId, it's likely a student ID string
+    student = await Student.findOne({ id: studentId })
+  }
 
   if (!student) {
     throw new AppError(httpStatus.NOT_FOUND, "Student not found")
@@ -156,8 +165,8 @@ const getMyEnrolledCoursesFromDB = async (studentId: string, query: Record<strin
   const meta = await enrolledCourseQuery.countTotal()
 
   return {
+    data: result,
     meta,
-    result,
   }
 }
 

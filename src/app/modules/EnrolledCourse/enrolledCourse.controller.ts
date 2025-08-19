@@ -25,7 +25,7 @@ const getMyEnrolledCourses = catchAsync(async (req, res) => {
     success: true,
     message: "Enrolled courses are retrieved successfully",
     meta: result.meta,
-    data: result.result,
+    data: result.data,
   })
 })
 
