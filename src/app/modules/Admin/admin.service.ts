@@ -32,6 +32,11 @@ const getSingleAdminFromDB = async (id: string) => {
   return result
 }
 
+const getMyProfileFromDB = async (userId: string) => {
+  const result = await Admin.findOne({ id: userId }).populate("user", "email")
+  return result
+}
+
 const updateAdminIntoDB = async (id: string, payload: Partial<TAdmin>) => {
   const { name, ...remainingAdminData } = payload
 
@@ -282,6 +287,7 @@ const unenrollStudentFromDB = async (enrollmentId: string) => {
 export const AdminServices = {
   getAllAdminsFromDB,
   getSingleAdminFromDB,
+  getMyProfileFromDB,
   updateAdminIntoDB,
   deleteAdminFromDB,
   getAllEnrollmentsFromDB,

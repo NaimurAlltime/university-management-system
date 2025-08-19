@@ -98,9 +98,22 @@ const unenrollStudent = catchAsync(async (req, res) => {
   })
 })
 
+const getMyProfile = catchAsync(async (req, res) => {
+  const { userId } = req.user
+  const result = await AdminServices.getMyProfileFromDB(userId)
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin profile retrieved successfully",
+    data: result,
+  })
+})
+
 export const AdminControllers = {
   getAllAdmins,
   getSingleAdmin,
+  getMyProfile,
   deleteAdmin,
   updateAdmin,
   getAllEnrollments,

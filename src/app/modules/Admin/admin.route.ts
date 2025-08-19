@@ -9,6 +9,8 @@ const router = express.Router()
 
 router.get("/", auth(USER_ROLE.superAdmin, USER_ROLE.admin), AdminControllers.getAllAdmins)
 
+router.get("/my-profile", auth(USER_ROLE.admin, USER_ROLE.superAdmin), AdminControllers.getMyProfile)
+
 router.get("/enrollments", auth(USER_ROLE.admin, USER_ROLE.superAdmin), AdminControllers.getAllEnrollments)
 
 router.get("/enrollment-stats", auth(USER_ROLE.admin, USER_ROLE.superAdmin), AdminControllers.getEnrollmentStats)
