@@ -4,6 +4,7 @@ export type TEnrolledCourseMarks = {
   classTest1: number
   midTerm: number
   classTest2: number
+  attendance: number
   finalTerm: number
 }
 

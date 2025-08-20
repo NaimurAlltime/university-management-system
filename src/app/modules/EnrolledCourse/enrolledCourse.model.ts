@@ -22,10 +22,16 @@ const courseMarksSchema = new Schema<TEnrolledCourseMarks>(
       max: 10,
       default: 0,
     },
+    attendance: {
+      type: Number,
+      min: 0,
+      max: 10,
+      default: 0,
+    },
     finalTerm: {
       type: Number,
       min: 0,
-      max: 50,
+      max: 40,
       default: 0,
     },
   },

@@ -173,15 +173,27 @@ const getMyEnrolledCoursesFromDB = async (studentId: string, query: Record<strin
 const updateEnrolledCourseMarksIntoDB = async (facultyId: string, payload: any) => {
   const { semesterRegistration, offeredCourse, student, courseMarks } = payload
 
+  console.log("[v0] Payload received:", JSON.stringify(payload, null, 2))
+  console.log("[v0] OfferedCourse ID:", offeredCourse)
+  console.log("[v0] OfferedCourse ID type:", typeof offeredCourse)
+
   const isSemesterRegistrationExists = await mongoose.model("SemesterRegistration").findById(semesterRegistration)
 
   if (!isSemesterRegistrationExists) {
     throw new AppError(httpStatus.NOT_FOUND, "Semester registration not found")
   }
 
+  if (!mongoose.Types.ObjectId.isValid(offeredCourse)) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid offered course ID format")
+  }
+
+  console.log("[v0] Searching for offered course with ID:", offeredCourse)
   const isOfferedCourseExists = await OfferedCourse.findById(offeredCourse)
+  console.log("[v0] Found offered course:", isOfferedCourseExists ? "YES" : "NO")
 
   if (!isOfferedCourseExists) {
+    const allOfferedCourses = await OfferedCourse.find({}).select("_id course").limit(5)
+    console.log("[v0] Sample offered courses in DB:", allOfferedCourses)
     throw new AppError(httpStatus.NOT_FOUND, "Offered course not found")
   }
 
@@ -191,7 +203,7 @@ const updateEnrolledCourseMarksIntoDB = async (facultyId: string, payload: any) 
     throw new AppError(httpStatus.NOT_FOUND, "Student not found")
   }
 
-  const faculty = await mongoose.model("Faculty").findOne({ user: facultyId }, { _id: 1 })
+  const faculty = await mongoose.model("Faculty").findOne({ id: facultyId }, { _id: 1 })
 
   if (!faculty) {
     throw new AppError(httpStatus.NOT_FOUND, "Faculty not found")
@@ -205,7 +217,17 @@ const updateEnrolledCourseMarksIntoDB = async (facultyId: string, payload: any) 
   })
 
   if (!isCourseBelongToFaculty) {
-    throw new AppError(httpStatus.FORBIDDEN, "You are forbidden")
+    const courseExists = await EnrolledCourse.findOne({
+      semesterRegistration,
+      offeredCourse,
+      student,
+    })
+
+    if (courseExists) {
+      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized to grade this course")
+    } else {
+      throw new AppError(httpStatus.NOT_FOUND, "Enrolled course not found for this student")
+    }
   }
 
   const modifiedData: Record<string, unknown> = {
@@ -213,59 +235,71 @@ const updateEnrolledCourseMarksIntoDB = async (facultyId: string, payload: any) 
   }
 
   if (courseMarks?.finalTerm) {
-    const { classTest1, classTest2, midTerm, finalTerm } = isCourseBelongToFaculty.courseMarks
+    const currentMarks = isCourseBelongToFaculty.courseMarks || {}
 
-    const totalMarks = Math.ceil(classTest1) + Math.ceil(midTerm) + Math.ceil(classTest2) + Math.ceil(finalTerm)
+    // Merge current marks with new marks from payload
+    const updatedMarks = {
+      classTest1: courseMarks.classTest1 !== undefined ? courseMarks.classTest1 : currentMarks.classTest1 || 0,
+      classTest2: courseMarks.classTest2 !== undefined ? courseMarks.classTest2 : currentMarks.classTest2 || 0,
+      midTerm: courseMarks.midTerm !== undefined ? courseMarks.midTerm : currentMarks.midTerm || 0,
+      attendance: courseMarks.attendance !== undefined ? courseMarks.attendance : currentMarks.attendance || 0,
+      finalTerm: courseMarks.finalTerm !== undefined ? courseMarks.finalTerm : currentMarks.finalTerm || 0,
+    }
 
-    if (totalMarks >= 0 && totalMarks <= 39) {
-      modifiedData.grade = "F"
-      modifiedData.gradePoints = GradePoints["F"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 40 && totalMarks <= 49) {
-      modifiedData.grade = "D"
-      modifiedData.gradePoints = GradePoints["D"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 50 && totalMarks <= 54) {
-      modifiedData.grade = "D+"
-      modifiedData.gradePoints = GradePoints["D+"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 55 && totalMarks <= 59) {
-      modifiedData.grade = "C-"
-      modifiedData.gradePoints = GradePoints["C-"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 60 && totalMarks <= 64) {
-      modifiedData.grade = "C"
-      modifiedData.gradePoints = GradePoints["C"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 65 && totalMarks <= 69) {
-      modifiedData.grade = "C+"
-      modifiedData.gradePoints = GradePoints["C+"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 70 && totalMarks <= 74) {
-      modifiedData.grade = "B-"
-      modifiedData.gradePoints = GradePoints["B-"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 75 && totalMarks <= 79) {
-      modifiedData.grade = "B"
-      modifiedData.gradePoints = GradePoints["B"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 80 && totalMarks <= 84) {
-      modifiedData.grade = "B+"
-      modifiedData.gradePoints = GradePoints["B+"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 85 && totalMarks <= 89) {
-      modifiedData.grade = "A-"
-      modifiedData.gradePoints = GradePoints["A-"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 90 && totalMarks <= 94) {
-      modifiedData.grade = "A"
-      modifiedData.gradePoints = GradePoints["A"]
-      modifiedData.isCompleted = true
-    } else if (totalMarks >= 95 && totalMarks <= 100) {
+    console.log("[v0] Updated marks for calculation:", updatedMarks)
+
+    const totalMarks =
+      Math.ceil(updatedMarks.classTest1) +
+      Math.ceil(updatedMarks.classTest2) +
+      Math.ceil(updatedMarks.midTerm) +
+      Math.ceil(updatedMarks.attendance) +
+      Math.ceil(updatedMarks.finalTerm)
+
+    console.log("[v0] Total calculated marks:", totalMarks)
+
+    if (totalMarks >= 80 && totalMarks <= 100) {
       modifiedData.grade = "A+"
       modifiedData.gradePoints = GradePoints["A+"]
       modifiedData.isCompleted = true
+    } else if (totalMarks >= 75 && totalMarks <= 79) {
+      modifiedData.grade = "A"
+      modifiedData.gradePoints = GradePoints["A"]
+      modifiedData.isCompleted = true
+    } else if (totalMarks >= 70 && totalMarks <= 74) {
+      modifiedData.grade = "A-"
+      modifiedData.gradePoints = GradePoints["A-"]
+      modifiedData.isCompleted = true
+    } else if (totalMarks >= 65 && totalMarks <= 69) {
+      modifiedData.grade = "B+"
+      modifiedData.gradePoints = GradePoints["B+"]
+      modifiedData.isCompleted = true
+    } else if (totalMarks >= 60 && totalMarks <= 64) {
+      modifiedData.grade = "B"
+      modifiedData.gradePoints = GradePoints["B"]
+      modifiedData.isCompleted = true
+    } else if (totalMarks >= 55 && totalMarks <= 59) {
+      modifiedData.grade = "B-"
+      modifiedData.gradePoints = GradePoints["B-"]
+      modifiedData.isCompleted = true
+    } else if (totalMarks >= 50 && totalMarks <= 54) {
+      modifiedData.grade = "C+"
+      modifiedData.gradePoints = GradePoints["C+"]
+      modifiedData.isCompleted = true
+    } else if (totalMarks >= 45 && totalMarks <= 49) {
+      modifiedData.grade = "C"
+      modifiedData.gradePoints = GradePoints["C"]
+      modifiedData.isCompleted = true
+    } else if (totalMarks >= 40 && totalMarks <= 44) {
+      modifiedData.grade = "D"
+      modifiedData.gradePoints = GradePoints["D"]
+      modifiedData.isCompleted = true
+    } else if (totalMarks >= 0 && totalMarks <= 39) {
+      modifiedData.grade = "F"
+      modifiedData.gradePoints = GradePoints["F"]
+      modifiedData.isCompleted = true
     }
+
+    console.log("[v0] Calculated grade:", modifiedData.grade, "Points:", modifiedData.gradePoints)
   }
 
   if (courseMarks && Object.keys(courseMarks).length) {
